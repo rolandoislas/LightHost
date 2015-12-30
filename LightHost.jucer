@@ -24,22 +24,47 @@
                        headerPath="" cppLanguageStandard="c++11" cppLibType="libc++"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_video" path="../../../../Applications/Projucer/modules"/>
-        <MODULEPATH id="juce_opengl" path="../../../../Applications/Projucer/modules"/>
-        <MODULEPATH id="juce_gui_extra" path="../../../../Applications/Projucer/modules"/>
-        <MODULEPATH id="juce_gui_basics" path="../../../../Applications/Projucer/modules"/>
-        <MODULEPATH id="juce_graphics" path="../../../../Applications/Projucer/modules"/>
-        <MODULEPATH id="juce_events" path="../../../../Applications/Projucer/modules"/>
-        <MODULEPATH id="juce_data_structures" path="../../../../Applications/Projucer/modules"/>
-        <MODULEPATH id="juce_cryptography" path="../../../../Applications/Projucer/modules"/>
-        <MODULEPATH id="juce_core" path="../../../../Applications/Projucer/modules"/>
-        <MODULEPATH id="juce_audio_utils" path="../../../../Applications/Projucer/modules"/>
-        <MODULEPATH id="juce_audio_processors" path="../../../../Applications/Projucer/modules"/>
-        <MODULEPATH id="juce_audio_formats" path="../../../../Applications/Projucer/modules"/>
-        <MODULEPATH id="juce_audio_devices" path="../../../../Applications/Projucer/modules"/>
-        <MODULEPATH id="juce_audio_basics" path="../../../../Applications/Projucer/modules"/>
+        <MODULEPATH id="juce_video" path="lib\juce"/>
+        <MODULEPATH id="juce_opengl" path="lib\juce"/>
+        <MODULEPATH id="juce_gui_extra" path="lib\juce"/>
+        <MODULEPATH id="juce_gui_basics" path="lib\juce"/>
+        <MODULEPATH id="juce_graphics" path="lib\juce"/>
+        <MODULEPATH id="juce_events" path="lib\juce"/>
+        <MODULEPATH id="juce_data_structures" path="lib\juce"/>
+        <MODULEPATH id="juce_cryptography" path="lib\juce"/>
+        <MODULEPATH id="juce_core" path="lib\juce"/>
+        <MODULEPATH id="juce_audio_utils" path="lib\juce"/>
+        <MODULEPATH id="juce_audio_processors" path="lib\juce"/>
+        <MODULEPATH id="juce_audio_formats" path="lib\juce"/>
+        <MODULEPATH id="juce_audio_devices" path="lib\juce"/>
+        <MODULEPATH id="juce_audio_basics" path="lib\juce"/>
       </MODULEPATHS>
     </XCODE_MAC>
+    <VS2015 targetFolder="Builds/VisualStudio2015" vstFolder="" vst3Folder=""
+            smallIcon="pmwje3" bigIcon="kxxp8K">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
+                       isDebug="1" optimisation="1" targetName="Light Host"/>
+        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
+                       isDebug="0" optimisation="3" targetName="Light Host"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_video" path="lib\juce"/>
+        <MODULEPATH id="juce_opengl" path="lib\juce"/>
+        <MODULEPATH id="juce_gui_extra" path="lib\juce"/>
+        <MODULEPATH id="juce_gui_basics" path="lib\juce"/>
+        <MODULEPATH id="juce_graphics" path="lib\juce"/>
+        <MODULEPATH id="juce_events" path="lib\juce"/>
+        <MODULEPATH id="juce_data_structures" path="lib\juce"/>
+        <MODULEPATH id="juce_cryptography" path="lib\juce"/>
+        <MODULEPATH id="juce_core" path="lib\juce"/>
+        <MODULEPATH id="juce_audio_utils" path="lib\juce"/>
+        <MODULEPATH id="juce_audio_processors" path="lib\juce"/>
+        <MODULEPATH id="juce_audio_formats" path="lib\juce"/>
+        <MODULEPATH id="juce_audio_devices" path="lib\juce"/>
+        <MODULEPATH id="juce_audio_basics" path="lib\juce"/>
+      </MODULEPATHS>
+    </VS2015>
   </EXPORTFORMATS>
   <MAINGROUP id="YdWL7hi7p" name="Light Host">
     <GROUP id="{1B23ABDC-E658-7C9C-3584-0C960D2AE323}" name="Source">
@@ -82,5 +107,6 @@
   </MODULES>
   <LIVE_SETTINGS>
     <OSX headerPath=""/>
+    <WINDOWS/>
   </LIVE_SETTINGS>
 </JUCERPROJECT>
