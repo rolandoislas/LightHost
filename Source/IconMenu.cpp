@@ -9,6 +9,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "IconMenu.hpp"
 #include "PluginWindow.h"
+#include <ctime>
 
 #if !JUCE_MAC
 class IconMenu::PluginListWindow : public DocumentWindow
@@ -93,15 +94,16 @@ void IconMenu::loadActivePlugins()
 {
     graph.clear();
     inputNode = graph.addNode(new AudioProcessorGraph::AudioGraphIOProcessor(AudioProcessorGraph::AudioGraphIOProcessor::audioInputNode), 1);
-     outputNode = graph.addNode(new AudioProcessorGraph::AudioGraphIOProcessor(AudioProcessorGraph::AudioGraphIOProcessor::audioOutputNode), 2);
+    outputNode = graph.addNode(new AudioProcessorGraph::AudioGraphIOProcessor(AudioProcessorGraph::AudioGraphIOProcessor::audioOutputNode), 2);
     if (activePluginList.getNumTypes() == 0)
     {
         graph.addConnection(1, 0, 2, 0);
         graph.addConnection(1, 1, 2, 1);
     }
+	int pluginTime = 0;
     for (int i = 0; i < activePluginList.getNumTypes(); i++)
     {
-        PluginDescription plugin = *activePluginList.getType(i);
+        PluginDescription plugin = getNextPluginOlderThanTime(pluginTime);
         String errorMessage;
         AudioPluginInstance* instance = formatManager.createPluginInstance(plugin, graph.getSampleRate(), graph.getBlockSize(), errorMessage);
 		String pluginUid;
@@ -132,6 +134,27 @@ void IconMenu::loadActivePlugins()
     }
 }
 
+PluginDescription IconMenu::getNextPluginOlderThanTime(int &time)
+{
+	int timeStatic = time;
+	PluginDescription closest;
+	int diff = INT_MAX;
+	for (int i = 0; i < activePluginList.getNumTypes(); i++)
+	{
+		PluginDescription plugin = *activePluginList.getType(i);
+		String key = "pluginOrder-" + plugin.descriptiveName + plugin.version + plugin.pluginFormatName;
+		String pluginTimeString = getAppProperties().getUserSettings()->getValue(key);
+		int pluginTime = atoi(pluginTimeString.toStdString().c_str());
+		if (pluginTime > timeStatic && abs(timeStatic - pluginTime) < diff)
+		{
+			diff = abs(timeStatic - pluginTime);
+			closest = plugin;
+			time = pluginTime;
+		}
+	}
+	return closest;
+}
+
 void IconMenu::changeListenerCallback(ChangeBroadcaster* changed)
 {
     if (changed == &knownPluginList)
@@ -150,7 +173,6 @@ void IconMenu::changeListenerCallback(ChangeBroadcaster* changed)
         {
             getAppProperties().getUserSettings()->setValue ("pluginListActive", savedPluginList);
             getAppProperties().saveIfNeeded();
-            loadActivePlugins();
         }
     }
 }
@@ -181,13 +203,15 @@ void IconMenu::timerCallback()
         menu.addItem(2, "Reload Plugins");
         menu.addSeparator();
         // Active plugins
+		int time = 0;
         for (int i = 0; i < activePluginList.getNumTypes(); i++)
         {
             PopupMenu options;
             options.addItem(i+3, "Edit");
             options.addItem(activePluginList.getNumTypes()+i+3, "Delete");
             // TODO bypass
-            menu.addSubMenu(activePluginList.getType(i)->name, options);
+			PluginDescription plugin = getNextPluginOlderThanTime(time);
+            menu.addSubMenu(plugin.name, options);
         }
         menu.addSeparator();
         // All plugins
@@ -236,14 +260,30 @@ void IconMenu::menuInvocationCallback(int id, IconMenu* im)
         if (id > im->activePluginList.getNumTypes() + 2 && id <= im->activePluginList.getNumTypes() * 2 + 2)
         {
             im->deletePluginStates();
-            im->activePluginList.removeType(id - im->activePluginList.getNumTypes() - 3);
-            
+
+			int index = id - im->activePluginList.getNumTypes() - 3;
+			PluginDescription plugin = *im->activePluginList.getType(index);
+			String key = "pluginOrder-" + plugin.descriptiveName + plugin.version + plugin.pluginFormatName;
+			getAppProperties().getUserSettings()->removeValue(key);
+			getAppProperties().saveIfNeeded();
+            im->activePluginList.removeType(index);
+
+			im->savePluginStates();
+			im->loadActivePlugins();
         }
         // Add plugin
         else if (id > im->activePluginList.getNumTypes() + 2)
         {
             im->deletePluginStates();
-            im->activePluginList.addType(*im->knownPluginList.getType(im->knownPluginList.getIndexChosenByMenu(id)));
+
+			PluginDescription plugin = *im->knownPluginList.getType(im->knownPluginList.getIndexChosenByMenu(id));
+			String key = "pluginOrder-" + plugin.descriptiveName + plugin.version + plugin.pluginFormatName;
+			getAppProperties().getUserSettings()->setValue(key, time(0));
+			getAppProperties().saveIfNeeded();
+            im->activePluginList.addType(plugin);
+
+			im->savePluginStates();
+			im->loadActivePlugins();
         }
         // Show active plugin GUI
         else
@@ -272,12 +312,14 @@ void IconMenu::savePluginStates()
 {
     for (int i = 0; i < activePluginList.getNumTypes(); i++)
     {
-        AudioProcessor& processor = *graph.getNodeForId(i+3)->getProcessor();
+		AudioProcessorGraph::Node* node = graph.getNodeForId(i+3);
+		if (node == nullptr)
+			break;
+        AudioProcessor& processor = *node->getProcessor();
 		String pluginUid;
 		pluginUid << "pluginState-" << i;
         MemoryBlock savedStateBinary;
         processor.getStateInformation(savedStateBinary);
-        ScopedPointer<XmlElement> savedStateXml(XmlElement::createTextElement(savedStateBinary.toBase64Encoding()));
         getAppProperties().getUserSettings()->setValue(pluginUid, savedStateBinary.toBase64Encoding());
         getAppProperties().saveIfNeeded();
     }
