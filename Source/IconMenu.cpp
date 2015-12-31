@@ -28,6 +28,7 @@ public:
 			deadMansPedalFile,
 			getAppProperties().getUserSettings()), true);
 
+		setUsingNativeTitleBar(true);
 		setResizable(true, false);
 		setResizeLimits(300, 400, 800, 1500);
 		setTopLeftPosition(60, 60);
@@ -200,7 +201,7 @@ void IconMenu::timerCallback()
     menu.addSectionHeader(JUCEApplication::getInstance()->getApplicationName());
     if (menuIconLeftClicked) {
         menu.addItem(1, "Preferences");
-        menu.addItem(2, "Reload Plugins");
+        menu.addItem(2, "Edit Plugins");
         menu.addSeparator();
         // Active plugins
 		int time = 0;
@@ -349,43 +350,21 @@ void IconMenu::showAudioSettings()
 
 void IconMenu::reloadPlugins()
 {
-	#if JUCE_MAC
-    NativeMessageBox::showOkCancelBox(AlertWindow::AlertIconType::InfoIcon, "Reload Plugins?", "Confirm scan and load of any new or updated plugins.", this, ModalCallbackFunction::forComponent(doReloadWithDefaultLocations, this));
-	#else
 	if (pluginListWindow == nullptr)
 		pluginListWindow = new PluginListWindow(*this, formatManager);
 	pluginListWindow->toFront(true);
-	#endif
+	removePluginsLackingInputOutput();
 }
 
-void IconMenu::doReloadWithDefaultLocations(int id, IconMenu* im)
+void IconMenu::removePluginsLackingInputOutput()
 {
-	#if JUCE_MAC
-    // Canceled
-    if (id == 0)
-        return Process::setDockIconVisible(false);
-	#endif
-    // Scan
-    const File deadMansPedalFile (getAppProperties().getUserSettings()->getFile().getSiblingFile("RecentlyCrashedPluginsList"));
-    String pluginName;
-    for (int i = 0; i < im->formatManager.getNumFormats(); i++)
-    {
-        im->scanner = new PluginDirectoryScanner(im->knownPluginList, *im->formatManager.getFormat(i), im->formatManager.getFormat(i)->getDefaultLocationsToSearch(), true, deadMansPedalFile);
-        while (im->scanner->scanNextFile(true, pluginName)) { }
-    }
-    // Remove plugins without inputs and/or outputs
-    std::vector<int> removeIndex;
-    for (int i = 0; i < im->knownPluginList.getNumTypes(); i++)
-    {
-        PluginDescription* plugin = im->knownPluginList.getType(i);
-        if (plugin->numInputChannels < 2 || plugin->numOutputChannels < 2)
-            removeIndex.push_back(i);
-    }
-    for (int i = 0; i < removeIndex.size(); i++)
-        im->knownPluginList.removeType(removeIndex[i] - i);
-    // Finish
-    NativeMessageBox::showMessageBox(AlertWindow::AlertIconType::InfoIcon, "Completed", "Plugins have been refreshed.");
-	#if JUCE_MAC
-    Process::setDockIconVisible(false);
-	#endif
+	std::vector<int> removeIndex;
+	for (int i = 0; i < knownPluginList.getNumTypes(); i++)
+	{
+		PluginDescription* plugin = knownPluginList.getType(i);
+		if (plugin->numInputChannels < 2 || plugin->numOutputChannels < 2)
+			removeIndex.push_back(i);
+	}
+	for (int i = 0; i < removeIndex.size(); i++)
+		knownPluginList.removeType(removeIndex[i] - i);
 }

@@ -31,6 +31,7 @@ private:
     void savePluginStates();
     void deletePluginStates();
 	PluginDescription getNextPluginOlderThanTime(int &time);
+	void removePluginsLackingInputOutput();
     
     AudioDeviceManager deviceManager;
     AudioPluginFormatManager formatManager;
