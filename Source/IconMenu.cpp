@@ -10,6 +10,48 @@
 #include "IconMenu.hpp"
 #include "PluginWindow.h"
 
+#if !JUCE_MAC
+class IconMenu::PluginListWindow : public DocumentWindow
+{
+public:
+	PluginListWindow(IconMenu& owner_, AudioPluginFormatManager& pluginFormatManager)
+		: DocumentWindow("Available Plugins", Colours::white,
+			DocumentWindow::minimiseButton | DocumentWindow::closeButton),
+		owner(owner_)
+	{
+		const File deadMansPedalFile(getAppProperties().getUserSettings()
+			->getFile().getSiblingFile("RecentlyCrashedPluginsList"));
+
+		setContentOwned(new PluginListComponent(pluginFormatManager,
+			owner.knownPluginList,
+			deadMansPedalFile,
+			getAppProperties().getUserSettings()), true);
+
+		setResizable(true, false);
+		setResizeLimits(300, 400, 800, 1500);
+		setTopLeftPosition(60, 60);
+
+		restoreWindowStateFromString(getAppProperties().getUserSettings()->getValue("listWindowPos"));
+		setVisible(true);
+	}
+
+	~PluginListWindow()
+	{
+		getAppProperties().getUserSettings()->setValue("listWindowPos", getWindowStateAsString());
+
+		clearContentComponent();
+	}
+
+	void closeButtonPressed()
+	{
+		owner.pluginListWindow = nullptr;
+	}
+
+private:
+	IconMenu& owner;
+};
+#endif
+
 IconMenu::IconMenu()
 {
     // Initiialization
@@ -32,10 +74,14 @@ IconMenu::IconMenu()
     loadActivePlugins();
     activePluginList.addChangeListener(this);
     // Set menu icon
-    if (exec("defaults read -g AppleInterfaceStyle").compare("Dark") == 1)
-        setIconImage(ImageFileFormat::loadFrom(BinaryData::menu_icon_white_png, BinaryData::menu_icon_white_pngSize));
-    else
-        setIconImage(ImageFileFormat::loadFrom(BinaryData::menu_icon_png, BinaryData::menu_icon_pngSize));
+	#if JUCE_MAC
+	if (exec("defaults read -g AppleInterfaceStyle").compare("Dark") == 1)
+		setIconImage(ImageFileFormat::loadFrom(BinaryData::menu_icon_white_png, BinaryData::menu_icon_white_pngSize));
+	else
+		setIconImage(ImageFileFormat::loadFrom(BinaryData::menu_icon_png, BinaryData::menu_icon_pngSize));
+	#else
+	setIconImage(ImageFileFormat::loadFrom(BinaryData::menu_icon_png, BinaryData::menu_icon_pngSize));
+	#endif
 };
 
 IconMenu::~IconMenu()
@@ -58,7 +104,8 @@ void IconMenu::loadActivePlugins()
         PluginDescription plugin = *activePluginList.getType(i);
         String errorMessage;
         AudioPluginInstance* instance = formatManager.createPluginInstance(plugin, graph.getSampleRate(), graph.getBlockSize(), errorMessage);
-        String pluginUid = "pluginState-" + std::to_string(i);
+		String pluginUid;
+		pluginUid << "pluginState-" << i;
         String savedPluginState = getAppProperties().getUserSettings()->getValue(pluginUid);
         MemoryBlock savedPluginBinary;
         savedPluginBinary.fromBase64Encoding(savedPluginState);
@@ -108,6 +155,7 @@ void IconMenu::changeListenerCallback(ChangeBroadcaster* changed)
     }
 }
 
+#if JUCE_MAC
 std::string IconMenu::exec(const char* cmd)
 {
     std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
@@ -121,6 +169,7 @@ std::string IconMenu::exec(const char* cmd)
     }
     return result;
 }
+#endif
 
 void IconMenu::timerCallback()
 {
@@ -153,7 +202,9 @@ void IconMenu::timerCallback()
 
 void IconMenu::mouseDown(const MouseEvent& e)
 {
-    Process::setDockIconVisible(true);
+	#if JUCE_MAC
+		Process::setDockIconVisible(true);
+	#endif
     Process::makeForegroundProcess();
     menuIconLeftClicked = e.mods.isLeftButtonDown();
     startTimer(50);
@@ -167,9 +218,11 @@ void IconMenu::menuInvocationCallback(int id, IconMenu* im)
         im->savePluginStates();
         return JUCEApplication::getInstance()->quit();
     }
+	#if JUCE_MAC
     // Click elsewhere
     if (id == 0 && !PluginWindow::containsActiveWindows())
         Process::setDockIconVisible(false);
+	#endif
     // Audio settings
     if (id == 1)
         im->showAudioSettings();
@@ -208,7 +261,8 @@ void IconMenu::deletePluginStates()
 {
     for (int i = 0; i < activePluginList.getNumTypes(); i++)
     {
-        String pluginUid = "pluginState-" + std::to_string(i);
+		String pluginUid;
+		pluginUid << "pluginState-" << i;
         getAppProperties().getUserSettings()->removeValue(pluginUid);
         getAppProperties().saveIfNeeded();
     }
@@ -219,7 +273,8 @@ void IconMenu::savePluginStates()
     for (int i = 0; i < activePluginList.getNumTypes(); i++)
     {
         AudioProcessor& processor = *graph.getNodeForId(i+3)->getProcessor();
-        String pluginUid = "pluginState-" + std::to_string(i);
+		String pluginUid;
+		pluginUid << "pluginState-" << i;
         MemoryBlock savedStateBinary;
         processor.getStateInformation(savedStateBinary);
         ScopedPointer<XmlElement> savedStateXml(XmlElement::createTextElement(savedStateBinary.toBase64Encoding()));
@@ -252,14 +307,22 @@ void IconMenu::showAudioSettings()
 
 void IconMenu::reloadPlugins()
 {
-    NativeMessageBox::showOkCancelBox(AlertWindow::AlertIconType::InfoIcon, "Reload Plugins?", "Confirm scan and load of any new or updated plugins.", this, ModalCallbackFunction::forComponent(doReload, this));
+	#if JUCE_MAC
+    NativeMessageBox::showOkCancelBox(AlertWindow::AlertIconType::InfoIcon, "Reload Plugins?", "Confirm scan and load of any new or updated plugins.", this, ModalCallbackFunction::forComponent(doReloadWithDefaultLocations, this));
+	#else
+	if (pluginListWindow == nullptr)
+		pluginListWindow = new PluginListWindow(*this, formatManager);
+	pluginListWindow->toFront(true);
+	#endif
 }
 
-void IconMenu::doReload(int id, IconMenu* im)
+void IconMenu::doReloadWithDefaultLocations(int id, IconMenu* im)
 {
+	#if JUCE_MAC
     // Canceled
     if (id == 0)
         return Process::setDockIconVisible(false);
+	#endif
     // Scan
     const File deadMansPedalFile (getAppProperties().getUserSettings()->getFile().getSiblingFile("RecentlyCrashedPluginsList"));
     String pluginName;
@@ -280,5 +343,7 @@ void IconMenu::doReload(int id, IconMenu* im)
         im->knownPluginList.removeType(removeIndex[i] - i);
     // Finish
     NativeMessageBox::showMessageBox(AlertWindow::AlertIconType::InfoIcon, "Completed", "Plugins have been refreshed.");
+	#if JUCE_MAC
     Process::setDockIconVisible(false);
+	#endif
 }
