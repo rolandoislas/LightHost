@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="NTe0XB0ij" name="Light Host" projectType="guiapp" version="1.0.0"
+<JUCERPROJECT id="NTe0XB0ij" name="Light Host" projectType="guiapp" version="1.1.0"
               juceLinkage="amalg_multi" juceFolder="../../../juce" buildVST="1"
               buildRTAS="0" buildAU="1" vstFolderMac="~/SDKs/vstsdk2.4" vstFolderPC="c:\SDKs\vstsdk2.4"
               rtasFolderMac="~/SDKs/PT_80_SDK" rtasFolderPC="c:\SDKs\PT_80_SDK"
@@ -41,7 +41,7 @@
       </MODULEPATHS>
     </XCODE_MAC>
     <VS2015 targetFolder="Builds/VisualStudio2015" vstFolder="" vst3Folder=""
-            smallIcon="pmwje3" bigIcon="kxxp8K">
+            smallIcon="pmwje3" bigIcon="kxxp8K" userNotes="Place ASIO SDK headers in juce folder.">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
                        isDebug="1" optimisation="1" targetName="Light Host"/>
@@ -88,7 +88,7 @@
                JUCE_QUICKTIME="disabled" JUCE_USE_FLAC="disabled" JUCE_USE_OGGVORBIS="disabled"
                JUCE_USE_CDBURNER="disabled" JUCE_USE_CDREADER="disabled" JUCE_USE_CAMERA="disabled"
                JUCE_PLUGINHOST_VST="enabled" JUCE_PLUGINHOST_AU="enabled" JUCE_WEB_BROWSER="disabled"
-               JUCE_PLUGINHOST_VST3="enabled"/>
+               JUCE_PLUGINHOST_VST3="enabled" JUCE_ASIO="enabled"/>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1"/>
     <MODULE id="juce_audio_devices" showAllCode="1"/>

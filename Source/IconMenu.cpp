@@ -238,7 +238,6 @@ void IconMenu::timerCallback()
 		iconLocation.x = 0;
 		iconLocation.y = 0;
 		GetCursorPos(&iconLocation);
-		std::cout << "";
 		x = iconLocation.x;
 		y = iconLocation.y;
 	}
