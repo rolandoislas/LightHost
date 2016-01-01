@@ -18,7 +18,6 @@ public:
     ~IconMenu();
     void mouseDown(const MouseEvent&);
     static void menuInvocationCallback(int id, IconMenu*);
-    static void doReloadWithDefaultLocations(int id, IconMenu*);
     void changeListenerCallback(ChangeBroadcaster* changed);
 private:
 	#if JUCE_MAC
@@ -45,6 +44,10 @@ private:
     AudioProcessorPlayer player;
     AudioProcessorGraph::Node *inputNode;
     AudioProcessorGraph::Node *outputNode;
+	#if JUCE_WINDOWS
+	int x, y;
+	#endif
+
 	#if !JUCE_MAC
 	class PluginListWindow;
 	ScopedPointer<PluginListWindow> pluginListWindow;

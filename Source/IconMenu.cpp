@@ -10,6 +10,9 @@
 #include "IconMenu.hpp"
 #include "PluginWindow.h"
 #include <ctime>
+#if JUCE_WINDOWS
+#include "Windows.h"
+#endif
 
 #if !JUCE_MAC
 class IconMenu::PluginListWindow : public DocumentWindow
@@ -58,6 +61,9 @@ IconMenu::IconMenu()
 {
     // Initiialization
     formatManager.addDefaultFormats();
+	#if JUCE_WINDOWS
+	x = y = 0;
+	#endif
     // Audio device
     ScopedPointer<XmlElement> savedAudioState (getAppProperties().getUserSettings()->getXmlValue("audioDeviceState"));
     deviceManager.initialise(256, 256, savedAudioState, true);
@@ -84,6 +90,7 @@ IconMenu::IconMenu()
 	#else
 	setIconImage(ImageFileFormat::loadFrom(BinaryData::menu_icon_png, BinaryData::menu_icon_pngSize));
 	#endif
+	setIconTooltip(JUCEApplication::getInstance()->getApplicationName());
 };
 
 IconMenu::~IconMenu()
@@ -222,7 +229,22 @@ void IconMenu::timerCallback()
     {
         menu.addItem(1, "Quit");
     }
+	#if JUCE_MAC || JUCE_LINUX
     menu.showMenuAsync(PopupMenu::Options().withTargetComponent(this), ModalCallbackFunction::forComponent(menuInvocationCallback, this));
+	#else
+	if (x == 0 || y == 0)
+	{
+		POINT iconLocation;
+		iconLocation.x = 0;
+		iconLocation.y = 0;
+		GetCursorPos(&iconLocation);
+		std::cout << "";
+		x = iconLocation.x;
+		y = iconLocation.y;
+	}
+	juce::Rectangle<int> rect(x, y, 1, 1);
+	menu.showMenuAsync(PopupMenu::Options().withTargetScreenArea(rect), ModalCallbackFunction::forComponent(menuInvocationCallback, this));
+	#endif
 }
 
 void IconMenu::mouseDown(const MouseEvent& e)
