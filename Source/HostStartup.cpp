@@ -23,7 +23,9 @@ public:
         LookAndFeel::setDefaultLookAndFeel (&lookAndFeel);
 
         mainWindow = new IconMenu();
-        Process::setDockIconVisible(false);
+		#if JUCE_MAC
+			Process::setDockIconVisible(false);
+		#endif
 
         File fileToOpen;
 

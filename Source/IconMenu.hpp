@@ -18,16 +18,19 @@ public:
     ~IconMenu();
     void mouseDown(const MouseEvent&);
     static void menuInvocationCallback(int id, IconMenu*);
-    static void doReload(int id, IconMenu*);
     void changeListenerCallback(ChangeBroadcaster* changed);
 private:
+	#if JUCE_MAC
     std::string exec(const char* cmd);
+	#endif
     void timerCallback();
     void reloadPlugins();
     void showAudioSettings();
     void loadActivePlugins();
     void savePluginStates();
     void deletePluginStates();
+	PluginDescription getNextPluginOlderThanTime(int &time);
+	void removePluginsLackingInputOutput();
     
     AudioDeviceManager deviceManager;
     AudioPluginFormatManager formatManager;
@@ -41,8 +44,12 @@ private:
     AudioProcessorPlayer player;
     AudioProcessorGraph::Node *inputNode;
     AudioProcessorGraph::Node *outputNode;
-    
-    class ScanThread;
+	#if JUCE_WINDOWS
+	int x, y;
+	#endif
+
+	class PluginListWindow;
+	ScopedPointer<PluginListWindow> pluginListWindow;
 };
 
 #endif /* IconMenu_hpp */
