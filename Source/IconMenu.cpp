@@ -14,7 +14,6 @@
 #include "Windows.h"
 #endif
 
-#if !JUCE_MAC
 class IconMenu::PluginListWindow : public DocumentWindow
 {
 public:
@@ -49,13 +48,16 @@ public:
 
 	void closeButtonPressed()
 	{
+        owner.removePluginsLackingInputOutput();
+        #if JUCE_MAC
+        Process::setDockIconVisible(false);
+        #endif
 		owner.pluginListWindow = nullptr;
 	}
 
 private:
 	IconMenu& owner;
 };
-#endif
 
 IconMenu::IconMenu()
 {
@@ -375,7 +377,6 @@ void IconMenu::reloadPlugins()
 	if (pluginListWindow == nullptr)
 		pluginListWindow = new PluginListWindow(*this, formatManager);
 	pluginListWindow->toFront(true);
-	removePluginsLackingInputOutput();
 }
 
 void IconMenu::removePluginsLackingInputOutput()

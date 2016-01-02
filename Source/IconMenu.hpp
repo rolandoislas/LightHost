@@ -48,10 +48,8 @@ private:
 	int x, y;
 	#endif
 
-	#if !JUCE_MAC
 	class PluginListWindow;
 	ScopedPointer<PluginListWindow> pluginListWindow;
-	#endif
 };
 
 #endif /* IconMenu_hpp */
