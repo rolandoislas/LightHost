@@ -300,7 +300,8 @@ void IconMenu::menuInvocationCallback(int id, IconMenu* im)
 
 			PluginDescription plugin = *im->knownPluginList.getType(im->knownPluginList.getIndexChosenByMenu(id));
 			String key = "pluginOrder-" + plugin.descriptiveName + plugin.version + plugin.pluginFormatName;
-			getAppProperties().getUserSettings()->setValue(key, time(0));
+			int t = time(0);
+			getAppProperties().getUserSettings()->setValue(key, t);
 			getAppProperties().saveIfNeeded();
             im->activePluginList.addType(plugin);
 

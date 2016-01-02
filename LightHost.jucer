@@ -65,6 +65,53 @@
         <MODULEPATH id="juce_audio_basics" path="lib\juce"/>
       </MODULEPATHS>
     </VS2015>
+    <CODEBLOCKS_LINUX targetFolder="Builds/CodeBlocksLinux" vstFolder="" vst3Folder=""
+                      smallIcon="pmwje3" bigIcon="kxxp8K" userNotes="Header search path for Steinberg SDK not being added to codeblocks.">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Light Host"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Light Host"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_video" path="lib/juce"/>
+        <MODULEPATH id="juce_opengl" path="lib/juce"/>
+        <MODULEPATH id="juce_gui_extra" path="lib/juce"/>
+        <MODULEPATH id="juce_gui_basics" path="lib/juce"/>
+        <MODULEPATH id="juce_graphics" path="lib/juce"/>
+        <MODULEPATH id="juce_events" path="lib/juce"/>
+        <MODULEPATH id="juce_data_structures" path="lib/juce"/>
+        <MODULEPATH id="juce_cryptography" path="lib/juce"/>
+        <MODULEPATH id="juce_core" path="lib/juce"/>
+        <MODULEPATH id="juce_audio_utils" path="lib/juce"/>
+        <MODULEPATH id="juce_audio_processors" path="lib/juce"/>
+        <MODULEPATH id="juce_audio_formats" path="lib/juce"/>
+        <MODULEPATH id="juce_audio_devices" path="lib/juce"/>
+        <MODULEPATH id="juce_audio_basics" path="lib/juce"/>
+      </MODULEPATHS>
+    </CODEBLOCKS_LINUX>
+    <LINUX_MAKE targetFolder="Builds/LinuxMakefile" vstFolder="" vst3Folder="">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/" isDebug="1" optimisation="1"
+                       targetName="Light Host"/>
+        <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/" isDebug="0" optimisation="3"
+                       targetName="Light Host"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_video" path="lib/juce"/>
+        <MODULEPATH id="juce_opengl" path="lib/juce"/>
+        <MODULEPATH id="juce_gui_extra" path="lib/juce"/>
+        <MODULEPATH id="juce_gui_basics" path="lib/juce"/>
+        <MODULEPATH id="juce_graphics" path="lib/juce"/>
+        <MODULEPATH id="juce_events" path="lib/juce"/>
+        <MODULEPATH id="juce_data_structures" path="lib/juce"/>
+        <MODULEPATH id="juce_cryptography" path="lib/juce"/>
+        <MODULEPATH id="juce_core" path="lib/juce"/>
+        <MODULEPATH id="juce_audio_utils" path="lib/juce"/>
+        <MODULEPATH id="juce_audio_processors" path="lib/juce"/>
+        <MODULEPATH id="juce_audio_formats" path="lib/juce"/>
+        <MODULEPATH id="juce_audio_devices" path="lib/juce"/>
+        <MODULEPATH id="juce_audio_basics" path="lib/juce"/>
+      </MODULEPATHS>
+    </LINUX_MAKE>
   </EXPORTFORMATS>
   <MAINGROUP id="YdWL7hi7p" name="Light Host">
     <GROUP id="{1B23ABDC-E658-7C9C-3584-0C960D2AE323}" name="Source">
