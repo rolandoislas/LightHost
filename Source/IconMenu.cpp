@@ -286,12 +286,27 @@ void IconMenu::menuInvocationCallback(int id, IconMenu* im)
             im->deletePluginStates();
 
 			int index = id - im->activePluginList.getNumTypes() - 3;
-			PluginDescription plugin = *im->activePluginList.getType(index);
-			String key = "pluginOrder-" + plugin.descriptiveName + plugin.version + plugin.pluginFormatName;
+			std::vector<PluginDescription> timeSorted = im->getTimeSortedList();
+			String key = "pluginOrder-" + timeSorted[index].descriptiveName + timeSorted[index].version + timeSorted[index].pluginFormatName;
+			int unsortedIndex = 0;
+			for (int i = 0; im->activePluginList.getNumTypes(); i++)
+			{
+				PluginDescription current = *im->activePluginList.getType(i);
+				if (key.equalsIgnoreCase("pluginOrder-" + current.descriptiveName + current.version + current.pluginFormatName))
+				{
+					unsortedIndex = i;
+					break;
+				}
+			}
+
+			// Remove plugin order
 			getAppProperties().getUserSettings()->removeValue(key);
 			getAppProperties().saveIfNeeded();
-            im->activePluginList.removeType(index);
+			
+			// Remove plugin from list
+            im->activePluginList.removeType(unsortedIndex);
 
+			// Save current states
 			im->savePluginStates();
 			im->loadActivePlugins();
         }
@@ -320,6 +335,16 @@ void IconMenu::menuInvocationCallback(int id, IconMenu* im)
         // Update menu
         im->startTimer(50);
     }
+}
+
+std::vector<PluginDescription> IconMenu::getTimeSortedList()
+{
+	int time = 0;
+	std::vector<PluginDescription> list;
+	for (int i = 0; i < activePluginList.getNumTypes(); i++)
+		list.push_back(getNextPluginOlderThanTime(time));
+	return list;
+		
 }
 
 void IconMenu::deletePluginStates()

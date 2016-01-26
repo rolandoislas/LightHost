@@ -31,6 +31,7 @@ private:
     void deletePluginStates();
 	PluginDescription getNextPluginOlderThanTime(int &time);
 	void removePluginsLackingInputOutput();
+	std::vector<PluginDescription> getTimeSortedList();
     
     AudioDeviceManager deviceManager;
     AudioPluginFormatManager formatManager;
