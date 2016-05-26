@@ -10,7 +10,7 @@
               pluginSilenceInIsSilenceOut="0" pluginTailLength="0" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="JuceProjectAU" pluginAUViewClass="JuceProjectAU_V1"
               pluginRTASCategory="" bundleIdentifier="com.rolandoislas.lighthost"
-              jucerVersion="4.1.0" companyName="Rolando Islas" includeBinaryInAppConfig="1"
+              jucerVersion="4.2.1" companyName="Rolando Islas" includeBinaryInAppConfig="1"
               companyWebsite="https://www.rolandoislas.com" companyEmail="admin@rolandoislas.com">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="" rtasFolder="~/SDKs/PT_80_SDK"
