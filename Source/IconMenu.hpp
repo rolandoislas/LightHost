@@ -19,6 +19,8 @@ public:
     void mouseDown(const MouseEvent&);
     static void menuInvocationCallback(int id, IconMenu*);
     void changeListenerCallback(ChangeBroadcaster* changed);
+
+	const int INDEX_EDIT, INDEX_BYPASS, INDEX_DELETE;
 private:
 	#if JUCE_MAC
     std::string exec(const char* cmd);
