@@ -19,6 +19,7 @@ public:
     void mouseDown(const MouseEvent&);
     static void menuInvocationCallback(int id, IconMenu*);
     void changeListenerCallback(ChangeBroadcaster* changed);
+	static String getKey(String type, PluginDescription plugin);
 
 	const int INDEX_EDIT, INDEX_BYPASS, INDEX_DELETE;
 private:

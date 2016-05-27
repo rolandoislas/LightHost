@@ -124,14 +124,13 @@ void IconMenu::loadActivePlugins()
         PluginDescription plugin = getNextPluginOlderThanTime(pluginTime);
         String errorMessage;
         AudioPluginInstance* instance = formatManager.createPluginInstance(plugin, graph.getSampleRate(), graph.getBlockSize(), errorMessage);
-		String pluginUid;
-		pluginUid << "pluginState-" << i;
+		String pluginUid = getKey("state", plugin);
         String savedPluginState = getAppProperties().getUserSettings()->getValue(pluginUid);
         MemoryBlock savedPluginBinary;
         savedPluginBinary.fromBase64Encoding(savedPluginState);
         instance->setStateInformation(savedPluginBinary.getData(), savedPluginBinary.getSize());
         graph.addNode(instance, i);
-		String key = "pluginBypass-" + plugin.descriptiveName + plugin.version + plugin.pluginFormatName;
+		String key = getKey("bypass", plugin);
 		bool bypass = getAppProperties().getUserSettings()->getBoolValue(key, false);
         // Input to plugin
         if ((!hasInputConnected) && (!bypass))
@@ -165,7 +164,7 @@ PluginDescription IconMenu::getNextPluginOlderThanTime(int &time)
 	for (int i = 0; i < activePluginList.getNumTypes(); i++)
 	{
 		PluginDescription plugin = *activePluginList.getType(i);
-		String key = "pluginOrder-" + plugin.descriptiveName + plugin.version + plugin.pluginFormatName;
+		String key = getKey("order", plugin);
 		String pluginTimeString = getAppProperties().getUserSettings()->getValue(key);
 		int pluginTime = atoi(pluginTimeString.toStdString().c_str());
 		if (pluginTime > timeStatic && abs(timeStatic - pluginTime) < diff)
@@ -232,7 +231,7 @@ void IconMenu::timerCallback()
             PopupMenu options;
             options.addItem(INDEX_EDIT + i, "Edit");
 			std::vector<PluginDescription> timeSorted = getTimeSortedList();
-			String key = "pluginBypass-" + timeSorted[i].descriptiveName + timeSorted[i].version + timeSorted[i].pluginFormatName;
+			String key = getKey("bypass", timeSorted[i]);
 			bool bypass = getAppProperties().getUserSettings()->getBoolValue(key);
 			options.addItem(INDEX_BYPASS + i, "Bypass", true, bypass);
             options.addItem(INDEX_DELETE + i, "Delete");
@@ -303,12 +302,12 @@ void IconMenu::menuInvocationCallback(int id, IconMenu* im)
 
 			int index = id - im->INDEX_DELETE;
 			std::vector<PluginDescription> timeSorted = im->getTimeSortedList();
-			String key = "pluginOrder-" + timeSorted[index].descriptiveName + timeSorted[index].version + timeSorted[index].pluginFormatName;
+			String key = getKey("order", timeSorted[index]);
 			int unsortedIndex = 0;
 			for (int i = 0; im->activePluginList.getNumTypes(); i++)
 			{
 				PluginDescription current = *im->activePluginList.getType(i);
-				if (key.equalsIgnoreCase("pluginOrder-" + current.descriptiveName + current.version + current.pluginFormatName))
+				if (key.equalsIgnoreCase(getKey("order", current)))
 				{
 					unsortedIndex = i;
 					break;
@@ -318,7 +317,7 @@ void IconMenu::menuInvocationCallback(int id, IconMenu* im)
 			// Remove plugin order
 			getAppProperties().getUserSettings()->removeValue(key);
 			// Remove bypass entry
-			getAppProperties().getUserSettings()->removeValue(key.replace("Order", "Bypass"));
+			getAppProperties().getUserSettings()->removeValue(getKey("bypass", timeSorted[index]));
 			getAppProperties().saveIfNeeded();
 			
 			// Remove plugin from list
@@ -334,7 +333,7 @@ void IconMenu::menuInvocationCallback(int id, IconMenu* im)
             im->deletePluginStates();
 
 			PluginDescription plugin = *im->knownPluginList.getType(im->knownPluginList.getIndexChosenByMenu(id));
-			String key = "pluginOrder-" + plugin.descriptiveName + plugin.version + plugin.pluginFormatName;
+			String key = getKey("order", plugin);
 			int t = time(0);
 			getAppProperties().getUserSettings()->setValue(key, t);
 			getAppProperties().saveIfNeeded();
@@ -350,7 +349,7 @@ void IconMenu::menuInvocationCallback(int id, IconMenu* im)
 
 			int index = id - im->INDEX_BYPASS;
 			std::vector<PluginDescription> timeSorted = im->getTimeSortedList();
-			String key = "pluginBypass-" + timeSorted[index].descriptiveName + timeSorted[index].version + timeSorted[index].pluginFormatName;
+			String key = getKey("bypass", timeSorted[index]);
 
 			// Set bypass flag
 			bool bypassed = getAppProperties().getUserSettings()->getBoolValue(key);
@@ -382,12 +381,18 @@ std::vector<PluginDescription> IconMenu::getTimeSortedList()
 		
 }
 
+String IconMenu::getKey(String type, PluginDescription plugin)
+{
+	String key = "plugin-" + type.toLowerCase() + "-" + plugin.name + plugin.version + plugin.pluginFormatName;
+	return key;
+}
+
 void IconMenu::deletePluginStates()
 {
-    for (int i = 1; i <= activePluginList.getNumTypes(); i++)
+	std::vector<PluginDescription> list = getTimeSortedList();
+    for (int i = 0; i < activePluginList.getNumTypes(); i++)
     {
-		String pluginUid;
-		pluginUid << "pluginState-" << i;
+		String pluginUid = getKey("state", list[i]);
         getAppProperties().getUserSettings()->removeValue(pluginUid);
         getAppProperties().saveIfNeeded();
     }
@@ -395,14 +400,14 @@ void IconMenu::deletePluginStates()
 
 void IconMenu::savePluginStates()
 {
-    for (int i = 1; i <= activePluginList.getNumTypes(); i++)
+	std::vector<PluginDescription> list = getTimeSortedList();
+    for (int i = 0; i < activePluginList.getNumTypes(); i++)
     {
-		AudioProcessorGraph::Node* node = graph.getNodeForId(i);
+		AudioProcessorGraph::Node* node = graph.getNodeForId(i + 1);
 		if (node == nullptr)
 			break;
         AudioProcessor& processor = *node->getProcessor();
-		String pluginUid;
-		pluginUid << "pluginState-" << i;
+		String pluginUid = getKey("state", list[i]);
         MemoryBlock savedStateBinary;
         processor.getStateInformation(savedStateBinary);
         getAppProperties().getUserSettings()->setValue(pluginUid, savedStateBinary.toBase64Encoding());
