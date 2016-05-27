@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="NTe0XB0ij" name="Light Host" projectType="guiapp" version="1.1.0"
+<JUCERPROJECT id="NTe0XB0ij" name="Light Host" projectType="guiapp" version="1.2.0"
               juceLinkage="amalg_multi" juceFolder="../../../juce" buildVST="1"
               buildRTAS="0" buildAU="1" vstFolderMac="~/SDKs/vstsdk2.4" vstFolderPC="c:\SDKs\vstsdk2.4"
               rtasFolderMac="~/SDKs/PT_80_SDK" rtasFolderPC="c:\SDKs\PT_80_SDK"
