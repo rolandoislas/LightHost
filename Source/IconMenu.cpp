@@ -59,7 +59,7 @@ private:
 	IconMenu& owner;
 };
 
-IconMenu::IconMenu() : INDEX_EDIT(1000000), INDEX_BYPASS(2000000), INDEX_DELETE(3000000)
+IconMenu::IconMenu() : INDEX_EDIT(1000000), INDEX_BYPASS(2000000), INDEX_DELETE(3000000), INDEX_MOVE_UP(4000000), INDEX_MOVE_DOWN(5000000)
 {
     // Initiialization
     formatManager.addDefaultFormats();
@@ -224,6 +224,7 @@ void IconMenu::timerCallback()
         menu.addItem(1, "Preferences");
         menu.addItem(2, "Edit Plugins");
         menu.addSeparator();
+		menu.addSectionHeader("Active Plugins");
         // Active plugins
 		int time = 0;
         for (int i = 0; i < activePluginList.getNumTypes(); i++)
@@ -234,17 +235,24 @@ void IconMenu::timerCallback()
 			String key = getKey("bypass", timeSorted[i]);
 			bool bypass = getAppProperties().getUserSettings()->getBoolValue(key);
 			options.addItem(INDEX_BYPASS + i, "Bypass", true, bypass);
+			options.addSeparator();
+			options.addItem(INDEX_MOVE_UP + i, "Move Up", i > 0);
+			options.addItem(INDEX_MOVE_DOWN + i, "Move Down", i < timeSorted.size() - 1);
+			options.addSeparator();
             options.addItem(INDEX_DELETE + i, "Delete");
 			PluginDescription plugin = getNextPluginOlderThanTime(time);
             menu.addSubMenu(plugin.name, options);
         }
         menu.addSeparator();
+		menu.addSectionHeader("Avaliable Plugins");
         // All plugins
         knownPluginList.addToMenu(menu, pluginSortMethod);
     }
     else
     {
         menu.addItem(1, "Quit");
+		menu.addSeparator();
+		menu.addItem(2, "Delete Plugin States");
     }
 	#if JUCE_MAC || JUCE_LINUX
     menu.showMenuAsync(PopupMenu::Options().withTargetComponent(this), ModalCallbackFunction::forComponent(menuInvocationCallback, this));
@@ -276,10 +284,18 @@ void IconMenu::mouseDown(const MouseEvent& e)
 void IconMenu::menuInvocationCallback(int id, IconMenu* im)
 {
     // Right click
-    if ((!im->menuIconLeftClicked) && id == 1)
+    if ((!im->menuIconLeftClicked))
     {
-        im->savePluginStates();
-        return JUCEApplication::getInstance()->quit();
+		if (id == 1)
+		{
+			im->savePluginStates();
+			return JUCEApplication::getInstance()->quit();
+		}
+		if (id == 2)
+		{
+			im->deletePluginStates();
+			return im->loadActivePlugins();
+		}
     }
 	#if JUCE_MAC
     // Click elsewhere
@@ -330,8 +346,6 @@ void IconMenu::menuInvocationCallback(int id, IconMenu* im)
         // Add plugin
         else if (im->knownPluginList.getIndexChosenByMenu(id) > -1)
         {
-            im->deletePluginStates();
-
 			PluginDescription plugin = *im->knownPluginList.getType(im->knownPluginList.getIndexChosenByMenu(id));
 			String key = getKey("order", plugin);
 			int t = time(0);
@@ -345,8 +359,6 @@ void IconMenu::menuInvocationCallback(int id, IconMenu* im)
 		// Bypass plugin
 		else if (id >= im->INDEX_BYPASS && id < im->INDEX_BYPASS + 1000000)
 		{
-			im->deletePluginStates();
-
 			int index = id - im->INDEX_BYPASS;
 			std::vector<PluginDescription> timeSorted = im->getTimeSortedList();
 			String key = getKey("bypass", timeSorted[index]);
@@ -366,6 +378,39 @@ void IconMenu::menuInvocationCallback(int id, IconMenu* im)
                 if (PluginWindow* const w = PluginWindow::getWindowFor(f, PluginWindow::Normal))
                     w->toFront(true);
         }
+		// Move plugin up the list
+		else if (id >= im->INDEX_MOVE_UP && id < im->INDEX_MOVE_UP + 1000000)
+		{
+			im->savePluginStates();
+			std::vector<PluginDescription> timeSorted = im->getTimeSortedList();
+			PluginDescription toMove = timeSorted[id - im->INDEX_MOVE_UP];
+			for (int i = 0; i < timeSorted.size(); i++)
+			{
+				bool move = getKey("move", toMove).equalsIgnoreCase(getKey("move", timeSorted[i]));
+				getAppProperties().getUserSettings()->setValue(getKey("order", timeSorted[i]), move ? i : i+1);
+				if (move)
+					getAppProperties().getUserSettings()->setValue(getKey("order", timeSorted[i-1]), i+1);
+			}
+			im->loadActivePlugins();
+		}
+		// Move plugin down the list
+		else if (id >= im->INDEX_MOVE_DOWN && id < im->INDEX_MOVE_DOWN + 1000000)
+		{
+			im->savePluginStates();
+			std::vector<PluginDescription> timeSorted = im->getTimeSortedList();
+			PluginDescription toMove = timeSorted[id - im->INDEX_MOVE_DOWN];
+			for (int i = 0; i < timeSorted.size(); i++)
+			{
+				bool move = getKey("move", toMove).equalsIgnoreCase(getKey("move", timeSorted[i]));
+				getAppProperties().getUserSettings()->setValue(getKey("order", timeSorted[i]), move ? i+2 : i+1);
+				if (move)
+				{
+					getAppProperties().getUserSettings()->setValue(getKey("order", timeSorted[i + 1]), i + 1);
+					i++;
+				}
+			}
+			im->loadActivePlugins();
+		}
         // Update menu
         im->startTimer(50);
     }

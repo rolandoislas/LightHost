@@ -21,7 +21,7 @@ public:
     void changeListenerCallback(ChangeBroadcaster* changed);
 	static String getKey(String type, PluginDescription plugin);
 
-	const int INDEX_EDIT, INDEX_BYPASS, INDEX_DELETE;
+	const int INDEX_EDIT, INDEX_BYPASS, INDEX_DELETE, INDEX_MOVE_UP, INDEX_MOVE_DOWN;
 private:
 	#if JUCE_MAC
     std::string exec(const char* cmd);
