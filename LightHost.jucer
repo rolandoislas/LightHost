@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="NTe0XB0ij" name="Light Host" projectType="guiapp" version="1.1.0"
+<JUCERPROJECT id="NTe0XB0ij" name="Light Host" projectType="guiapp" version="1.2.0"
               juceLinkage="amalg_multi" juceFolder="../../../juce" buildVST="1"
               buildRTAS="0" buildAU="1" vstFolderMac="~/SDKs/vstsdk2.4" vstFolderPC="c:\SDKs\vstsdk2.4"
               rtasFolderMac="~/SDKs/PT_80_SDK" rtasFolderPC="c:\SDKs\PT_80_SDK"
@@ -10,7 +10,7 @@
               pluginSilenceInIsSilenceOut="0" pluginTailLength="0" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="JuceProjectAU" pluginAUViewClass="JuceProjectAU_V1"
               pluginRTASCategory="" bundleIdentifier="com.rolandoislas.lighthost"
-              jucerVersion="4.1.0" companyName="Rolando Islas" includeBinaryInAppConfig="1"
+              jucerVersion="4.2.1" companyName="Rolando Islas" includeBinaryInAppConfig="1"
               companyWebsite="https://www.rolandoislas.com" companyEmail="admin@rolandoislas.com">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="" rtasFolder="~/SDKs/PT_80_SDK"

@@ -1,12 +1,12 @@
 Light Host
 ---
 
-A simple VST/AU host for OS X, Windows, and Linux that sits in the menubar.
+A simple VST/AU host for OS X, Windows, and Linux that sits in the menu/task bar.
 
 ### Features
 
-- Add/remove plugins (AU/VST/VST3)
-- Change output and input
-- ASIO support for Windows
-- Plugin states saved
-- Saved plugin order
+See #1
+
+### Screenshot
+
+![Light Host 1.2](http://i.imgur.com/UF9SWfC.jpg)
