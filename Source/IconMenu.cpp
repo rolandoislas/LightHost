@@ -83,21 +83,40 @@ IconMenu::IconMenu() : INDEX_EDIT(1000000), INDEX_BYPASS(2000000), INDEX_DELETE(
         activePluginList.recreateFromXml(*savedPluginListActive);
     loadActivePlugins();
     activePluginList.addChangeListener(this);
-    // Set menu icon
-	#if JUCE_MAC
-	if (exec("defaults read -g AppleInterfaceStyle").compare("Dark") == 1)
-		setIconImage(ImageFileFormat::loadFrom(BinaryData::menu_icon_white_png, BinaryData::menu_icon_white_pngSize));
-	else
-		setIconImage(ImageFileFormat::loadFrom(BinaryData::menu_icon_png, BinaryData::menu_icon_pngSize));
-	#else
-	setIconImage(ImageFileFormat::loadFrom(BinaryData::menu_icon_png, BinaryData::menu_icon_pngSize));
-	#endif
+	setIcon();
 	setIconTooltip(JUCEApplication::getInstance()->getApplicationName());
 };
 
 IconMenu::~IconMenu()
 {
 	savePluginStates();
+}
+
+void IconMenu::setIcon()
+{
+	// Set menu icon
+	#if JUCE_MAC
+		if (exec("defaults read -g AppleInterfaceStyle").compare("Dark") == 1)
+			setIconImage(ImageFileFormat::loadFrom(BinaryData::menu_icon_white_png, BinaryData::menu_icon_white_pngSize));
+		else
+			setIconImage(ImageFileFormat::loadFrom(BinaryData::menu_icon_png, BinaryData::menu_icon_pngSize));
+	#else
+		String defaultColor;
+	#if JUCE_WINDOWS
+		defaultColor = "white";
+	#elif JUCE_LINUX
+		defaultColor = "black";
+	#endif
+		if (!getAppProperties().getUserSettings()->containsKey("icon"))
+			getAppProperties().getUserSettings()->setValue("icon", defaultColor);
+		String color = getAppProperties().getUserSettings()->getValue("icon");
+		Image icon;
+		if (color.equalsIgnoreCase("white"))
+			icon = ImageFileFormat::loadFrom(BinaryData::menu_icon_white_png, BinaryData::menu_icon_white_pngSize);
+		else if (color.equalsIgnoreCase("black"))
+			icon = ImageFileFormat::loadFrom(BinaryData::menu_icon_png, BinaryData::menu_icon_pngSize);
+		setIconImage(icon);
+	#endif
 }
 
 void IconMenu::loadActivePlugins()
@@ -253,6 +272,9 @@ void IconMenu::timerCallback()
         menu.addItem(1, "Quit");
 		menu.addSeparator();
 		menu.addItem(2, "Delete Plugin States");
+		#if !JUCE_MAC
+			menu.addItem(3, "Invert Icon Color");
+		#endif
     }
 	#if JUCE_MAC || JUCE_LINUX
     menu.showMenuAsync(PopupMenu::Options().withTargetComponent(this), ModalCallbackFunction::forComponent(menuInvocationCallback, this));
@@ -295,6 +317,12 @@ void IconMenu::menuInvocationCallback(int id, IconMenu* im)
 		{
 			im->deletePluginStates();
 			return im->loadActivePlugins();
+		}
+		if (id == 3)
+		{
+			String color = getAppProperties().getUserSettings()->getValue("icon");
+			getAppProperties().getUserSettings()->setValue("icon", color.equalsIgnoreCase("black") ? "white" : "black");
+			return im->setIcon();
 		}
     }
 	#if JUCE_MAC

@@ -35,6 +35,7 @@ private:
 	PluginDescription getNextPluginOlderThanTime(int &time);
 	void removePluginsLackingInputOutput();
 	std::vector<PluginDescription> getTimeSortedList();
+	void setIcon();
     
     AudioDeviceManager deviceManager;
     AudioPluginFormatManager formatManager;
