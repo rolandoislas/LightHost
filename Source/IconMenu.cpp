@@ -10,6 +10,7 @@
 #include "IconMenu.hpp"
 #include "PluginWindow.h"
 #include <ctime>
+#include <limits.h>
 #if JUCE_WINDOWS
 #include "Windows.h"
 #endif
