@@ -7,6 +7,7 @@
 
 class PluginHostApp  : public JUCEApplication
 {
+
 public:
     PluginHostApp() {}
 
@@ -17,6 +18,8 @@ public:
         options.filenameSuffix      = "settings";
         options.osxLibrarySubFolder = "Preferences";
 
+        checkArguments(&options);
+
         appProperties = new ApplicationProperties();
         appProperties->setStorageParameters (options);
 
@@ -26,16 +29,6 @@ public:
 		#if JUCE_MAC
 			Process::setDockIconVisible(false);
 		#endif
-
-        File fileToOpen;
-
-        for (int i = 0; i < getCommandLineParameterArray().size(); ++i)
-        {
-            fileToOpen = File::getCurrentWorkingDirectory().getChildFile (getCommandLineParameterArray()[i]);
-
-            if (fileToOpen.existsAsFile())
-                break;
-        }
     }
 
     void shutdown() override
@@ -52,7 +45,10 @@ public:
 
     const String getApplicationName() override       { return "Light Host"; }
     const String getApplicationVersion() override    { return ProjectInfo::versionString; }
-    bool moreThanOneInstanceAllowed() override       { return false; }
+    bool moreThanOneInstanceAllowed() override       {
+        StringArray multiInstance = getParameter("-multi-instance");
+        return multiInstance.size() == 2;
+    }
 
     ApplicationCommandManager commandManager;
     ScopedPointer<ApplicationProperties> appProperties;
@@ -60,6 +56,30 @@ public:
 
 private:
     ScopedPointer<IconMenu> mainWindow;
+
+    StringArray getParameter(String lookFor) {
+        StringArray parameters = getCommandLineParameterArray();
+        StringArray found;
+        for (int i = 0; i < parameters.size(); ++i)
+        {
+            String param = parameters[i];
+            if (param.contains(lookFor))
+            {
+                found.add(lookFor);
+                int delimiter = param.indexOf(0, "=") + 1;
+                String val = param.substring(delimiter);
+                found.add(val);
+                return found;
+            }
+        }
+        return found;
+    }
+
+    void checkArguments(PropertiesFile::Options *options) {
+        StringArray multiInstance = getParameter("-multi-instance");
+        if (multiInstance.size() == 2)
+            options->filenameSuffix = multiInstance[1] + "." + options->filenameSuffix;
+    }
 };
 
 static PluginHostApp& getApp()                      { return *dynamic_cast<PluginHostApp*>(JUCEApplication::getInstance()); }
